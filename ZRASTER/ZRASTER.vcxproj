@@ -28,6 +28,9 @@
     <ClInclude Include="geometry.h" />
     <ClInclude Include="zraster.h" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\README.md" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{2CDCB185-B4C4-4E6B-BBE2-F16C9F4A764B}</ProjectGuid>
     <RootNamespace>ZRASTER</RootNamespace>

@@ -25,6 +25,9 @@
     <ClCompile Include="geometry.cpp">
       <Filter>Geometry</Filter>
     </ClCompile>
+    <ClCompile Include="color.cpp">
+      <Filter>Graphics</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="constants.h">
@@ -35,6 +38,9 @@
     </ClInclude>
     <ClInclude Include="zraster.h">
       <Filter>App</Filter>
+    </ClInclude>
+    <ClInclude Include="color.h">
+      <Filter>Graphics</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

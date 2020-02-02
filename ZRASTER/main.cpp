@@ -1,6 +1,6 @@
 #include "zraster.h"
 #include "geometry.h"
-
+#include "color.h"
 
 int main()
 {
@@ -10,6 +10,9 @@ int main()
 	}
 
 	mesh meshCube;
+	mat4x4 matProj;
+	vec3d vCamera = {};
+
 	float fTheta = 0.0f;
 
 	meshCube.tris = {
@@ -38,7 +41,6 @@ int main()
 		{ 1.0f, 0.0f, 1.0f,    0.0f, 0.0f, 0.0f,    1.0f, 0.0f, 0.0f },
 	};
 
-	mat4x4 matProj;
 
 	float fNear = 0.1f;
 	float fFar = 1000.0f;
@@ -93,6 +95,7 @@ int main()
 			multVec3Mat44(triRotatedZ.p[1], triRotatedZX.p[1], matRotX);
 			multVec3Mat44(triRotatedZ.p[2], triRotatedZX.p[2], matRotX);
 
+			// offset slightly
 
 			triTranslated = triRotatedZX;
 			triTranslated.p[0].z = triRotatedZX.p[0].z + 3.0f;
@@ -100,28 +103,76 @@ int main()
 			triTranslated.p[2].z = triRotatedZX.p[2].z + 3.0f;
 
 
-			multVec3Mat44(triTranslated.p[0], triProjected.p[0], matProj);
-			multVec3Mat44(triTranslated.p[1], triProjected.p[1], matProj);
-			multVec3Mat44(triTranslated.p[2], triProjected.p[2], matProj);
+			vec3d normal, line1, line2;
+			line1.x = triTranslated.p[1].x - triTranslated.p[0].x;
+			line1.y = triTranslated.p[1].y - triTranslated.p[0].y;
+			line1.z = triTranslated.p[1].z - triTranslated.p[0].z;
 
-			// scale into view
+			line2.x = triTranslated.p[2].x - triTranslated.p[0].x;
+			line2.y = triTranslated.p[2].y - triTranslated.p[0].y;
+			line2.z = triTranslated.p[2].z - triTranslated.p[0].z;
 
-			triProjected.p[0].x += 1.0f; triProjected.p[0].y += 1.0f;
-			triProjected.p[1].x += 1.0f; triProjected.p[1].y += 1.0f;
-			triProjected.p[2].x += 1.0f; triProjected.p[2].y += 1.0f;
+			normal.x = line1.y * line2.z - line1.z * line2.y;
+			normal.y = line1.z * line2.x - line1.x * line2.z;
+			normal.z = line1.x * line2.y - line1.y * line2.x;
 
-			triProjected.p[0].x *= 0.5f * (float)WIDTH;
-			triProjected.p[0].y *= 0.5f * (float)HEIGHT;
-			triProjected.p[1].x *= 0.5f * (float)WIDTH;
-			triProjected.p[1].y *= 0.5f * (float)HEIGHT;
-			triProjected.p[2].x *= 0.5f * (float)WIDTH;
-			triProjected.p[2].y *= 0.5f * (float)HEIGHT;
+			float lenNormal = sqrtf(normal.x * normal.x + normal.y * normal.y + normal.z * normal.z);
+			normal.x /= 1;
+			normal.y /= 1;
+			normal.z /= 1;
 
-			app.drawtriangle(
-				triProjected.p[0].x, triProjected.p[0].y,
-				triProjected.p[1].x, triProjected.p[1].y,
-				triProjected.p[2].x, triProjected.p[2].y,
-				0xffffffff);
+			// TODO(ZED): make Cross product, lenght of the vector and vector normalisation functions
+			//            and stop coding like a HOBO
+
+			if (normal.x * (triTranslated.p[0].x - vCamera.x) +
+				normal.y * (triTranslated.p[0].y - vCamera.y) +
+				normal.z * (triTranslated.p[0].z - vCamera.z) < 0) {
+
+				vec3d light_direction = { 0.0f, 0.0f, -1.0f };
+				float l = sqrtf(light_direction.x * light_direction.x +
+					light_direction.y * light_direction.y +
+					light_direction.z * light_direction.z);
+
+				light_direction.x /= l;
+				light_direction.y /= l;
+				light_direction.z /= l;
+
+				float dp = normal.x * light_direction.x + normal.y * light_direction.y + normal.z * light_direction.z;
+
+				uint32_t c = getcolor(dp);
+				triTranslated.color = c;
+
+				multVec3Mat44(triTranslated.p[0], triProjected.p[0], matProj);
+				multVec3Mat44(triTranslated.p[1], triProjected.p[1], matProj);
+				multVec3Mat44(triTranslated.p[2], triProjected.p[2], matProj);
+
+				// scale into view
+
+				triProjected.p[0].x += 1.0f; triProjected.p[0].y += 1.0f;
+				triProjected.p[1].x += 1.0f; triProjected.p[1].y += 1.0f;
+				triProjected.p[2].x += 1.0f; triProjected.p[2].y += 1.0f;
+				triProjected.color = c;
+
+				triProjected.p[0].x *= 0.5f * (float)WIDTH;
+				triProjected.p[0].y *= 0.5f * (float)HEIGHT;
+				triProjected.p[1].x *= 0.5f * (float)WIDTH;
+				triProjected.p[1].y *= 0.5f * (float)HEIGHT;
+				triProjected.p[2].x *= 0.5f * (float)WIDTH;
+				triProjected.p[2].y *= 0.5f * (float)HEIGHT;
+
+				app.filltriangle(
+					triProjected.p[0].x, triProjected.p[0].y,
+					triProjected.p[1].x, triProjected.p[1].y,
+					triProjected.p[2].x, triProjected.p[2].y,
+					triProjected.color);
+
+				// Debug only
+				app.drawtriangle(
+					triProjected.p[0].x, triProjected.p[0].y,
+					triProjected.p[1].x, triProjected.p[1].y,
+					triProjected.p[2].x, triProjected.p[2].y,
+					0x00000000);
+			}
 		}
 
 		app.update();

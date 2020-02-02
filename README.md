@@ -4,7 +4,7 @@
 
 
 Courtsey of javidx9
-
-Does not use olcPixelGameEngine. Uses SDL2 for drawing stuff. Sorry for the potato code organisation.
+Does not use olcPixelGameEngine. Uses SDL2 for drawing stuff. Sorry for the potato code organisation. 
+Happy birthday ID software!
 
  

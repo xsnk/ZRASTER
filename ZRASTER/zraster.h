@@ -12,6 +12,7 @@ class ZRASTER {
 public:
 
 	ZRASTER();
+	~ZRASTER();
 
 	bool init(const char* title, int width, int height);
 	void update();

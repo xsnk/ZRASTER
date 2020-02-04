@@ -2,6 +2,8 @@
 #include "geometry.h"
 #include "color.h"
 
+#include <algorithm>
+
 int main()
 {
 	ZRASTER app;
@@ -15,32 +17,36 @@ int main()
 
 	float fTheta = 0.0f;
 
-	meshCube.tris = {
-		// SOUTH
-		{ 0.0f, 0.0f, 0.0f,    0.0f, 1.0f, 0.0f,    1.0f, 1.0f, 0.0f },
-		{ 0.0f, 0.0f, 0.0f,    1.0f, 1.0f, 0.0f,    1.0f, 0.0f, 0.0f },
+//	meshCube.tris = {
+//		// SOUTH
+//		{ 0.0f, 0.0f, 0.0f,    0.0f, 1.0f, 0.0f,    1.0f, 1.0f, 0.0f },
+//		{ 0.0f, 0.0f, 0.0f,    1.0f, 1.0f, 0.0f,    1.0f, 0.0f, 0.0f },
+//
+//		// EAST                                                      
+//		{ 1.0f, 0.0f, 0.0f,    1.0f, 1.0f, 0.0f,    1.0f, 1.0f, 1.0f },
+//		{ 1.0f, 0.0f, 0.0f,    1.0f, 1.0f, 1.0f,    1.0f, 0.0f, 1.0f },
+//
+//		// NORTH                                                     
+//		{ 1.0f, 0.0f, 1.0f,    1.0f, 1.0f, 1.0f,    0.0f, 1.0f, 1.0f },
+//		{ 1.0f, 0.0f, 1.0f,    0.0f, 1.0f, 1.0f,    0.0f, 0.0f, 1.0f },
+//
+//		// WEST                                                      
+//		{ 0.0f, 0.0f, 1.0f,    0.0f, 1.0f, 1.0f,    0.0f, 1.0f, 0.0f },
+//		{ 0.0f, 0.0f, 1.0f,    0.0f, 1.0f, 0.0f,    0.0f, 0.0f, 0.0f },
+//
+//		// TOP                                                       
+//		{ 0.0f, 1.0f, 0.0f,    0.0f, 1.0f, 1.0f,    1.0f, 1.0f, 1.0f },
+//		{ 0.0f, 1.0f, 0.0f,    1.0f, 1.0f, 1.0f,    1.0f, 1.0f, 0.0f },
+//
+//		// BOTTOM                                                    
+//		{ 1.0f, 0.0f, 1.0f,    0.0f, 0.0f, 1.0f,    0.0f, 0.0f, 0.0f },
+//		{ 1.0f, 0.0f, 1.0f,    0.0f, 0.0f, 0.0f,    1.0f, 0.0f, 0.0f },
+//	};
 
-		// EAST                                                      
-		{ 1.0f, 0.0f, 0.0f,    1.0f, 1.0f, 0.0f,    1.0f, 1.0f, 1.0f },
-		{ 1.0f, 0.0f, 0.0f,    1.0f, 1.0f, 1.0f,    1.0f, 0.0f, 1.0f },
-
-		// NORTH                                                     
-		{ 1.0f, 0.0f, 1.0f,    1.0f, 1.0f, 1.0f,    0.0f, 1.0f, 1.0f },
-		{ 1.0f, 0.0f, 1.0f,    0.0f, 1.0f, 1.0f,    0.0f, 0.0f, 1.0f },
-
-		// WEST                                                      
-		{ 0.0f, 0.0f, 1.0f,    0.0f, 1.0f, 1.0f,    0.0f, 1.0f, 0.0f },
-		{ 0.0f, 0.0f, 1.0f,    0.0f, 1.0f, 0.0f,    0.0f, 0.0f, 0.0f },
-
-		// TOP                                                       
-		{ 0.0f, 1.0f, 0.0f,    0.0f, 1.0f, 1.0f,    1.0f, 1.0f, 1.0f },
-		{ 0.0f, 1.0f, 0.0f,    1.0f, 1.0f, 1.0f,    1.0f, 1.0f, 0.0f },
-
-		// BOTTOM                                                    
-		{ 1.0f, 0.0f, 1.0f,    0.0f, 0.0f, 1.0f,    0.0f, 0.0f, 0.0f },
-		{ 1.0f, 0.0f, 1.0f,    0.0f, 0.0f, 0.0f,    1.0f, 0.0f, 0.0f },
-	};
-
+	if (!meshCube.loadfromobj("cow.obj")) {
+		printf("Cant find file");
+		exit(EXIT_FAILURE);
+	}
 
 	float fNear = 0.1f;
 	float fFar = 1000.0f;
@@ -83,6 +89,8 @@ int main()
 		matRotX.m[3][3] = 1;
 
 
+		std::vector<triangle> vecTrianglesToRaster;
+
 		for (auto tri : meshCube.tris) {
 
 			triangle triProjected, triTranslated, triRotatedZ, triRotatedX, triRotatedZX;
@@ -98,9 +106,9 @@ int main()
 			// offset slightly
 
 			triTranslated = triRotatedZX;
-			triTranslated.p[0].z = triRotatedZX.p[0].z + 3.0f;
-			triTranslated.p[1].z = triRotatedZX.p[1].z + 3.0f;
-			triTranslated.p[2].z = triRotatedZX.p[2].z + 3.0f;
+			triTranslated.p[0].z = triRotatedZX.p[0].z + 12.0f;
+			triTranslated.p[1].z = triRotatedZX.p[1].z + 12.0f;
+			triTranslated.p[2].z = triRotatedZX.p[2].z + 12.0f;
 
 
 			vec3d normal, line1, line2;
@@ -116,10 +124,10 @@ int main()
 			normal.y = line1.z * line2.x - line1.x * line2.z;
 			normal.z = line1.x * line2.y - line1.y * line2.x;
 
-			float lenNormal = sqrtf(normal.x * normal.x + normal.y * normal.y + normal.z * normal.z);
-			normal.x /= 1;
-			normal.y /= 1;
-			normal.z /= 1;
+			float l = sqrtf(normal.x * normal.x + normal.y * normal.y + normal.z * normal.z);
+			normal.x /= l;
+			normal.y /= l;
+			normal.z /= l;
 
 			// TODO(ZED): make Cross product, lenght of the vector and vector normalisation functions
 			//            and stop coding like a HOBO
@@ -160,19 +168,35 @@ int main()
 				triProjected.p[2].x *= 0.5f * (float)WIDTH;
 				triProjected.p[2].y *= 0.5f * (float)HEIGHT;
 
-				app.filltriangle(
-					triProjected.p[0].x, triProjected.p[0].y,
-					triProjected.p[1].x, triProjected.p[1].y,
-					triProjected.p[2].x, triProjected.p[2].y,
-					triProjected.color);
+				vecTrianglesToRaster.push_back(triProjected);
 
-				// Debug only
-				app.drawtriangle(
-					triProjected.p[0].x, triProjected.p[0].y,
-					triProjected.p[1].x, triProjected.p[1].y,
-					triProjected.p[2].x, triProjected.p[2].y,
-					0x00000000);
 			}
+		}
+
+
+		std::sort(vecTrianglesToRaster.begin(), vecTrianglesToRaster.end(), [](triangle& t1, triangle& t2)
+		{
+			float z1 = (t1.p[0].z + t1.p[1].z + t1.p[2].z) / 3.0f;
+			float z2 = (t2.p[0].z + t2.p[1].z + t2.p[2].z) / 3.0f;
+			return z1 > z2;
+
+		});
+
+
+		for (auto& triProjected : vecTrianglesToRaster) {
+
+			app.filltriangle(
+				triProjected.p[0].x, triProjected.p[0].y,
+				triProjected.p[1].x, triProjected.p[1].y,
+				triProjected.p[2].x, triProjected.p[2].y,
+				triProjected.color);
+
+			// Debug only
+			//app.drawtriangle(
+			//	triProjected.p[0].x, triProjected.p[0].y,
+			//	triProjected.p[1].x, triProjected.p[1].y,
+			//	triProjected.p[2].x, triProjected.p[2].y,
+			//	0xffffffff);
 		}
 
 		app.update();

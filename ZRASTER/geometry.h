@@ -3,6 +3,9 @@
 #include <vector>
 #include <cmath>
 
+#include <fstream>
+#include <strstream>
+
 struct vec3d {
 	float x, y, z;
 };
@@ -15,6 +18,8 @@ struct triangle {
 
 struct mesh {
 	std::vector<triangle> tris;
+
+	bool loadfromobj(std::string file);
 };
 
 struct mat4x4 {

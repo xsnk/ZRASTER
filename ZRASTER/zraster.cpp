@@ -6,6 +6,11 @@ ZRASTER::ZRASTER()
 	fbuf = new uint32_t[sizeof(uint32_t) * WIDTH * HEIGHT * 4];
 }
 
+ZRASTER::~ZRASTER()
+{
+	delete fbuf;
+}
+
 bool ZRASTER::init(const char* title, int width, int height)
 {
 	SDL_Init(SDL_INIT_VIDEO);
@@ -37,7 +42,6 @@ bool ZRASTER::init(const char* title, int width, int height)
 	screen_texture = SDL_CreateTexture(renderer,
 		SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING,
 		width, height);
-
 
 
 	return true;

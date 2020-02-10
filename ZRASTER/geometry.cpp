@@ -1,16 +1,142 @@
 #include "geometry.h"
 
-void multVec3Mat44(vec3d& i, vec3d& o, mat4x4& m)
-{
-	o.x = i.x * m.m[0][0] + i.y * m.m[1][0] + i.z * m.m[2][0] + m.m[3][0];
-	o.y = i.x * m.m[0][1] + i.y * m.m[1][1] + i.z * m.m[2][1] + m.m[3][1];
-	o.z = i.x * m.m[0][2] + i.y * m.m[1][2] + i.z * m.m[2][2] + m.m[3][2];
-	float w = i.x * m.m[0][3] + i.y * m.m[1][3] + i.z * m.m[2][3] + m.m[3][3];
 
-	if (w != 0.0f)
-	{
-		o.x /= w; o.y /= w; o.z /= w;
+vec3d vaddvector(vec3d& v1, vec3d& v2)
+{
+	return vec3d(v1.x + v2.x, v1.y + v2.y, v1.z + v2.z);
+}
+
+vec3d vsubvector(vec3d& v1, vec3d& v2)
+{
+	return vec3d(float(static_cast<float>(v1.x) - static_cast<float>(v2.x)), float(v1.y - v2.y), float(v1.z - v2.z));
+}
+
+vec3d smulvector(vec3d& v1, float k)
+{
+	return vec3d(v1.x * k, v1.y * k, v1.z * k);
+}
+
+vec3d sdivvector(vec3d& v1, float k)
+{
+	return vec3d(v1.x / k, v1.y / k, v1.z / k);
+}
+
+float vdotproduct(vec3d& v1, vec3d& v2)
+{
+	return v1.x * v2.x + v1.y * v2.y + v1.z * v2.z;
+}
+
+float vlenght(vec3d& v)
+{
+	return sqrtf(vdotproduct(v, v));
+}
+
+vec3d vnormalise(vec3d& v)
+{
+	float l = vlenght(v);
+	return vec3d(v.x / l, v.y / l, v.z / l);
+}
+
+vec3d vcrossproduct(vec3d& v1, vec3d& v2)
+{
+	vec3d v;
+	v.x = v1.y * v2.z - v1.z * v2.y;
+	v.y = v1.z * v2.x - v1.x * v2.z;
+	v.z = v1.x * v2.y - v1.y * v2.x;
+	return v;
+}
+
+vec3d mmulvec3mat44(mat4x4& m, vec3d& i)
+{
+	vec3d v;
+	v.x = i.x * m.m[0][0] + i.y * m.m[1][0] + i.z * m.m[2][0] + i.w * m.m[3][0];
+	v.y = i.x * m.m[0][1] + i.y * m.m[1][1] + i.z * m.m[2][1] + i.w * m.m[3][1];
+	v.z = i.x * m.m[0][2] + i.y * m.m[1][2] + i.z * m.m[2][2] + i.w * m.m[3][2];
+	v.w = i.x * m.m[0][3] + i.y * m.m[1][3] + i.z * m.m[2][3] + i.w * m.m[3][3];
+	return v;
+}
+
+mat4x4 mnewidentitymatrix()
+{
+	mat4x4 mat;
+	mat.m[0][0] = 1.0f;
+	mat.m[1][1] = 1.0f;
+	mat.m[2][2] = 1.0f;
+	mat.m[3][3] = 1.0f;
+	return mat;
+}
+
+mat4x4 mnewrotationmatrix_x(float fTheta)
+{
+	mat4x4 mat;
+	mat.m[0][0] = 1.0f;
+	mat.m[1][1] = cosf(fTheta);
+	mat.m[1][2] = -sinf(fTheta);
+	mat.m[2][1] = sinf(fTheta);
+	mat.m[2][2] = cosf(fTheta);
+	mat.m[3][3] = 1.0f;
+	return mat;
+}
+
+mat4x4 mnewrotationmatrix_y(float fTheta)
+{
+	mat4x4 mat;
+	mat.m[0][0] = cosf(fTheta);
+	mat.m[0][2] = sinf(fTheta);
+	mat.m[2][0] = -sinf(fTheta);
+	mat.m[2][2] = cosf(fTheta);
+	mat.m[1][1] = 1.0f;
+	mat.m[3][3] = 1.0f;
+	return mat;
+}
+
+mat4x4 mnewrotationmatrix_z(float fTheta)
+{
+	mat4x4 mat;
+	mat.m[0][0] = cosf(fTheta);
+	mat.m[0][1] = sinf(fTheta);
+	mat.m[1][0] = -sinf(fTheta);
+	mat.m[1][1] = cosf(fTheta);
+	mat.m[2][2] = 1.0f;
+	mat.m[3][3] = 1.0f;
+	return mat;
+}
+
+mat4x4 mnewtranslationmatrix(float x, float y, float z)
+{
+	mat4x4 mat;
+	mat.m[0][0] = 1.0f;
+	mat.m[1][1] = 1.0f;
+	mat.m[2][2] = 1.0f;
+	mat.m[3][3] = 1.0f;
+	mat.m[3][0] = x;
+	mat.m[3][1] = y;
+	mat.m[3][2] = z;
+	return mat;
+}
+
+mat4x4 mnewprojectionmatrix(float fFovDegrees, float fAspectRatio, float fNear, float fFar)
+{
+	mat4x4 mat;
+	float fFovRad = 1.0 / tanf(fFovDegrees * 0.5f / 180.0f * 3.14159f);
+	mat.m[0][0] = fAspectRatio * fFovRad;
+	mat.m[1][1] = fFovRad;
+	mat.m[2][2] = fFar / (fFar - fNear);
+	mat.m[3][2] = (-fFar * fNear) / (fFar - fNear);
+	mat.m[2][3] = 1.0f;
+	mat.m[3][3] = 1.0f;
+	return mat;
+}
+
+mat4x4 mmulmat44mat44(mat4x4& m1, mat4x4& m2)
+{
+	mat4x4 mat;
+	for (int c = 0; c < 4; c++) {
+		for (int r = 0; r < 4; r++) {
+			mat.m[r][c] = m1.m[r][0] * m2.m[0][c] + m1.m[r][1] * m2.m[1][c] + m1.m[r][2] * m2.m[2][c] + m1.m[r][3] * m2.m[3][c];
+		}
 	}
+	return mat;
 }
 
 bool mesh::loadfromobj(std::string file)

@@ -66,5 +66,5 @@ void ZRASTER::pollevent()
 
 void ZRASTER::clear()
 {
-	SDL_memset(fbuf, 0, WIDTH * HEIGHT * 4);
+	SDL_memset(fbuf, 0x00000000, WIDTH * HEIGHT * 4);
 }

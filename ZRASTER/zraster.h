@@ -17,11 +17,17 @@ public:
 	bool init(const char* title, int width, int height);
 	void update();
 	void pollevent();
+	void k_callback(char x);
 	void clear();
 
 	inline void putpixel(int x, int y, uint32_t color)
 	{
-		fbuf[x + y * WIDTH] = color;
+		if (x >= 0 && x < WIDTH && y >= 0 && y < HEIGHT) {
+			fbuf[x + y * WIDTH] = color;
+		}
+		else {
+			return;
+		}
 	}
 
 	inline void drawline(int x0, int y0, int x1, int y1, uint32_t color)
@@ -209,6 +215,16 @@ public:
 		}
 	}
 
+public:
+	bool aKey = false;
+	bool wKey = false;
+	bool sKey = false;
+	bool dKey = false;
+	bool upKey = false;
+	bool downKey = false;
+	bool leftKey = false;
+	bool rightKey = false;
+
 
 private:
 	uint32_t* fbuf = nullptr;
@@ -220,3 +236,4 @@ private:
 	SDL_Event event;
 
 };
+

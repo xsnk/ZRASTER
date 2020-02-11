@@ -56,11 +56,23 @@ void ZRASTER::update()
 	SDL_RenderPresent(renderer);
 }
 
+
 void ZRASTER::pollevent()
 {
 	while (SDL_PollEvent(&event))
 	{
 		if (event.type == SDL_QUIT) exit(0);
+		if (event.key.keysym.sym == SDLK_a) aKey = true;
+		if (event.key.keysym.sym == SDLK_w) wKey = true;
+		if (event.key.keysym.sym == SDLK_s) sKey = true;
+		if (event.key.keysym.sym == SDLK_d) dKey = true;
+		if (event.key.keysym.sym == SDLK_UP) upKey = true;
+		if (event.key.keysym.sym == SDLK_DOWN) downKey = true;
+		if (event.key.keysym.sym == SDLK_LEFT) leftKey = true;
+		if (event.key.keysym.sym == SDLK_RIGHT) rightKey = true;
+
+
+		
 	}
 }
 
@@ -68,3 +80,6 @@ void ZRASTER::clear()
 {
 	SDL_memset(fbuf, 0x00000000, WIDTH * HEIGHT * 4);
 }
+
+
+

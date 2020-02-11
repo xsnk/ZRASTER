@@ -3,6 +3,8 @@
 #include "color.h"
 
 #include <algorithm>
+#include <functional>
+
 
 int main()
 {
@@ -14,7 +16,9 @@ int main()
 	mesh meshCube;
 	mat4x4 matProj;
 	vec3d vCamera = {};
+	vec3d vLookDir = {};
 
+	float fYaw = 0.0f;
 	float fTheta = 0.0f;
 
 	if (!meshCube.loadfromobj("cow.obj")) {
@@ -29,14 +33,62 @@ int main()
 
 	matProj = mnewprojectionmatrix(fFov, fAspectRatio, fNear, fFar);
 
+
 	while (1)
 	{
+		app.wKey = false;
+		app.sKey = false;
+		app.aKey = false;
+		app.dKey = false;
+		app.upKey = false;
+		app.downKey = false;
+		app.leftKey = false;
+		app.rightKey = false;
+
+		vec3d vUp = { 0,1,0 };
+		vec3d vTarget = { 0,0,1 };
+		mat4x4 matCameraRot = mnewrotationmatrix_y(fYaw);
+		vLookDir = vmulvec3mat44(matCameraRot, vTarget);
+		vTarget = vaddvector(vCamera, vLookDir);
+
 		app.pollevent();
+
+		if (app.upKey) {
+			vCamera.y += 8.0f * 0.036;
+		}
+		if (app.downKey) {
+			vCamera.y -= 8.0f * 0.036;
+		}
+
+		if (app.leftKey) {
+			vCamera.x += 8.0f * 0.036;
+		}
+		if (app.rightKey) {
+			vCamera.x -= 8.0f * 0.036;
+		}
+
+
+		vec3d vForward = smulvector(vLookDir, 8.0f * 0.036);
+
+		if (app.wKey) {
+			vCamera = vaddvector(vCamera, vForward);
+		}
+
+		if (app.sKey) {
+			vCamera = vsubvector(vCamera, vForward);
+		}
+
+		if (app.aKey) {
+			fYaw -= 2.0f * 0.036;
+		}
+		if (app.dKey) {
+			fYaw += 2.0f * 0.036;
+		}
 
 		app.clear();
 
 		mat4x4 matRotZ, matRotX;
-		fTheta += 1.0f * 0.03;
+//		fTheta += 1.0f * 0.03;
 		
 		matRotZ = mnewrotationmatrix_z(fTheta);
 		matRotX = mnewrotationmatrix_x(fTheta);
@@ -49,15 +101,17 @@ int main()
 		matWorld = mmulmat44mat44(matRotZ, matRotX);
 		matWorld = mmulmat44mat44(matWorld, matTrans);
 
+		mat4x4 matCamera = mpointat(vCamera, vTarget, vUp);
+		mat4x4 matView = mquickinverserotmat(matCamera);
 
 		std::vector<triangle> vecTrianglesToRaster;
-		triangle triProjected, triTransformed;
 
 		for (auto tri : meshCube.tris) {
-
-			triTransformed.p[0] = mmulvec3mat44(matWorld, tri.p[0]);
-			triTransformed.p[1] = mmulvec3mat44(matWorld, tri.p[1]);
-			triTransformed.p[2] = mmulvec3mat44(matWorld, tri.p[2]);
+			
+			triangle triProjected, triTransformed, triViewed;
+			triTransformed.p[0] = vmulvec3mat44(matWorld, tri.p[0]);
+			triTransformed.p[1] = vmulvec3mat44(matWorld, tri.p[1]);
+			triTransformed.p[2] = vmulvec3mat44(matWorld, tri.p[2]);
 
 			vec3d normal, line1, line2;
 
@@ -79,9 +133,14 @@ int main()
 				uint32_t c = getcolor(dp);
 				triTransformed.color = c;
 
-				triProjected.p[0] = mmulvec3mat44(matProj, triTransformed.p[0]);
-				triProjected.p[1] = mmulvec3mat44(matProj, triTransformed.p[1]);
-				triProjected.p[2] = mmulvec3mat44(matProj, triTransformed.p[2]);
+				triViewed.p[0] = vmulvec3mat44(matView, triTransformed.p[0]);
+				triViewed.p[1] = vmulvec3mat44(matView, triTransformed.p[1]);
+				triViewed.p[2] = vmulvec3mat44(matView, triTransformed.p[2]);
+
+
+				triProjected.p[0] = vmulvec3mat44(matProj, triViewed.p[0]);
+				triProjected.p[1] = vmulvec3mat44(matProj, triViewed.p[1]);
+				triProjected.p[2] = vmulvec3mat44(matProj, triViewed.p[2]);
 				triProjected.color = triTransformed.color;
 
 				triProjected.p[0] = sdivvector(triProjected.p[0], triProjected.p[0].w);
@@ -134,7 +193,7 @@ int main()
 			//	triProjected.p[2].x, triProjected.p[2].y,
 			//	0xffffffff);
 		}
-
+		app.pollevent();
 		app.update();
 
 	}
